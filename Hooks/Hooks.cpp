@@ -228,6 +228,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             case CMD_KB_HOOK_LOW_STOP:
                 LOWStopKbHook(NULL);
+                
                 break;
 
             case CMD_MOUSE_HOOK_LOW_START:
@@ -335,7 +336,9 @@ LRESULT CALLBACK KbHookProc(int nCode, WPARAM wParam, LPARAM lParam) {
 }
 
 DWORD CALLBACK  LOWStartKbHook(LPVOID params) {
+
     LOWkbhook = SetWindowsHookExW(WH_KEYBOARD_LL, LOWKbHookProc, GetModuleHandle(NULL), 0);
+
     if (LOWkbhook != 0) {
 
         _snwprintf(str, MAX_LOADSTRING, L"LL Started");
@@ -366,6 +369,8 @@ DWORD CALLBACK  LOWStopKbHook(LPVOID params) {
 
     }
     SendMessage(list, LB_ADDSTRING, 0, (LPARAM)str);
+    
+
     return 0;
 
 }
